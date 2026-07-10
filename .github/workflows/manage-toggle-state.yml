@@ -31,7 +31,8 @@ on:
       state:
         description: Desired state
         type: choice
-        options: [on, off]
+        # Quoted: bare on/off are YAML booleans and would be passed as "true"/"false".
+        options: ["on", "off"]
         required: true
 
 permissions:
