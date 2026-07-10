@@ -12,26 +12,12 @@ toggles:
     name: processor-engine
     description: Enables the event processor engine.
     states:
-      prd: true
-      qa: false
-
-  - service: bff
-    name: processor-config-write
-    description: Enables the GraphQL write surface for processor configs.
-    states:
       prd: false
       qa: false
 
   - service: web
     name: new-dashboard
     description: Enables the new dashboard layout.
-    states:
-      prd: false
-      qa: false
-
-  - service: ingest
-    name: encrypted-payload
-    description: Enables encrypted payload handling on ingest.
     states:
       prd: false
       qa: false
