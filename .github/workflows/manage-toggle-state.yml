@@ -1,5 +1,9 @@
 name: Manage Toggle State
 
+# The run title identifies exactly what was managed: which toggle, to which
+# state, in which environment — visible at a glance in the Actions list.
+run-name: "Toggle ${{ inputs.service }}.${{ inputs.toggle_name }} → ${{ inputs.state }} · ${{ inputs.environment }}"
+
 # Flips a single toggle ON/OFF for one environment by editing toggles.yaml and
 # opening a PR. Merging the PR triggers Apply Toggles. This keeps every change
 # auditable and revertable via Git — there is no direct-to-Unleash path.

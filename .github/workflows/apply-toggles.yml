@@ -1,5 +1,7 @@
 name: Apply Toggles
 
+run-name: "Apply · ${{ inputs.environment || 'active envs' }}${{ inputs.dry_run && ' (dry-run)' || '' }}"
+
 # Applies toggles.yaml to Unleash. On merge to main the active environments
 # (config/environments.yaml) are applied automatically; workflow_dispatch can
 # target any environment and supports a dry run. The apply job runs under a
