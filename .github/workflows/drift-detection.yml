@@ -1,0 +1,68 @@
+name: Drift Detection
+
+# Compares toggles.yaml against Unleash. Read-only, so it does NOT run under a
+# GitHub Environment (no approval gate blocking the schedule). Actionable drift
+# (missing / state / description) fails the run; Unleash-only flags are warnings.
+on:
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: Target environment
+        type: choice
+        options: [prd, qa]
+        default: prd
+  schedule:
+    - cron: '0 6 * * *'
+
+permissions:
+  contents: read
+
+jobs:
+  plan:
+    runs-on: ubuntu-latest
+    outputs:
+      envs: ${{ steps.set.outputs.envs }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+      - run: npm ci
+      - id: set
+        run: |
+          if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
+            echo "envs=[\"${{ inputs.environment }}\"]" >> "$GITHUB_OUTPUT"
+          else
+            echo "envs=$(node src/list-active-envs.ts)" >> "$GITHUB_OUTPUT"
+          fi
+
+  drift:
+    needs: plan
+    if: needs.plan.outputs.envs != '[]'
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        env: ${{ fromJSON(needs.plan.outputs.envs) }}
+    env:
+      UNLEASH_URL: ${{ secrets.UNLEASH_URL }}
+      UNLEASH_API_TOKEN: ${{ secrets.UNLEASH_API_TOKEN }}
+      TARGET_ENV: ${{ matrix.env }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+      - run: npm ci
+      # The Unleash admin API is reachable only over the tailnet; join it as an
+      # ephemeral tag:ci node (the tailnet ACL is flat, so 443 is reachable).
+      - name: Connect Tailscale
+        uses: tailscale/github-action@v3
+        with:
+          oauth-client-id: ${{ secrets.TS_OAUTH_CLIENT_ID }}
+          oauth-secret: ${{ secrets.TS_OAUTH_SECRET }}
+          tags: tag:ci
+      - name: Detect drift
+        run: npm run drift

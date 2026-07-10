@@ -1,0 +1,21 @@
+# Logical environments and how each maps onto the shared Unleash server.
+#
+# Webhookr runs a single Unleash instance; environments are distinguished by
+# Unleash's own environment concept (project:environment token scoping), not by
+# separate instances. Git is the source of truth for this mapping.
+#
+#   name               logical key used in toggles.yaml `states` and workflows
+#   active             true  -> applied automatically on merge to main
+#                      false -> declared but not yet provisioned (skipped)
+#   unleashEnvironment the Unleash environment the state is written to
+#   unleashProject     the Unleash project the flags live in
+environments:
+  - name: prd
+    active: true
+    unleashEnvironment: production
+    unleashProject: default
+
+  - name: qa
+    active: false
+    unleashEnvironment: qa
+    unleashProject: default

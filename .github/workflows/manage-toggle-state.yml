@@ -1,0 +1,84 @@
+name: Manage Toggle State
+
+# Flips a single toggle ON/OFF for one environment by editing toggles.yaml and
+# opening a PR. Merging the PR triggers Apply Toggles. This keeps every change
+# auditable and revertable via Git — there is no direct-to-Unleash path.
+#
+# The PR is created with TOGGLES_PR_PAT (not GITHUB_TOKEN) so the required
+# "Validate Toggles" check runs on it — PRs opened by GITHUB_TOKEN do not
+# trigger pull_request workflows.
+on:
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: Target environment
+        type: choice
+        options: [prd, qa]
+        required: true
+      service:
+        description: Owning service
+        type: choice
+        options: [web, bff, svc, ingest]
+        required: true
+      toggle_name:
+        description: Toggle name (without the webhookr.<service>. prefix)
+        type: string
+        required: true
+      state:
+        description: Desired state
+        type: choice
+        options: [on, off]
+        required: true
+
+permissions:
+  contents: read
+
+jobs:
+  edit:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.TOGGLES_PR_PAT }}
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+      - run: npm ci
+
+      - name: Edit toggles.yaml
+        run: npm run set-state -- "${{ inputs.environment }}" "${{ inputs.service }}" "${{ inputs.toggle_name }}" "${{ inputs.state }}"
+
+      - name: Validate
+        run: npm run validate
+
+      - name: Open and auto-merge pull request
+        env:
+          GH_TOKEN: ${{ secrets.TOGGLES_PR_PAT }}
+          SERVICE: ${{ inputs.service }}
+          NAME: ${{ inputs.toggle_name }}
+          ENV: ${{ inputs.environment }}
+          STATE: ${{ inputs.state }}
+        run: |
+          set -euo pipefail
+          BRANCH="chore/toggle-${SERVICE}-${NAME}-${ENV}-${STATE}-${GITHUB_RUN_ID}"
+          TITLE="chore(toggle): set ${SERVICE}.${NAME} ${ENV} -> ${STATE}"
+          git config user.name "webhookr-ci[bot]"
+          git config user.email "ci@webhookr.tech"
+          git checkout -b "$BRANCH"
+          git add toggles.yaml
+          git commit -m "$TITLE"
+          git push --set-upstream origin "$BRANCH"
+          gh pr create --base main --head "$BRANCH" \
+            --title "$TITLE" \
+            --body "Flip \`webhookr.${SERVICE}.${NAME}\` to **${STATE}** in **${ENV}**. Merging applies it to Unleash."
+
+          # Wait for the required check to register, watch it to completion, then
+          # squash-merge. The PR is opened with TOGGLES_PR_PAT so the check runs
+          # and the merge's push triggers Apply Toggles.
+          for _ in $(seq 1 30); do
+            if gh pr checks "$BRANCH" >/dev/null 2>&1; then break; fi
+            sleep 5
+          done
+          gh pr checks "$BRANCH" --watch --interval 10
+          gh pr merge "$BRANCH" --squash --delete-branch
