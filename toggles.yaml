@@ -1,0 +1,23 @@
+# Declarative source of truth for Webhookr feature toggles.
+#
+# Final Unleash name is computed as: webhookr.<service>.<name>
+# The environment is NOT part of the name — each environment maps to its own
+# Unleash environment (see config/environments.yaml). States are declared per
+# logical environment (prd, qa) and applied by the Apply Toggles workflow.
+#
+# Allowed services: web, bff, svc, ingest.
+# Name pattern: lowercase kebab-case (^[a-z][a-z0-9]*(-[a-z0-9]+)*$).
+toggles:
+  - service: svc
+    name: processor-engine
+    description: Enables the event processor engine.
+    states:
+      prd: false
+      qa: false
+
+  - service: web
+    name: new-dashboard
+    description: Enables the new dashboard layout.
+    states:
+      prd: false
+      qa: false

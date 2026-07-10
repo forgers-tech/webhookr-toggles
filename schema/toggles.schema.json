@@ -1,0 +1,40 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://webhookr.tech/schemas/toggles.schema.json",
+  "title": "Webhookr toggles declaration",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["toggles"],
+  "properties": {
+    "toggles": {
+      "type": "array",
+      "items": { "$ref": "#/definitions/toggle" }
+    }
+  },
+  "definitions": {
+    "toggle": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["service", "name", "description", "states"],
+      "properties": {
+        "service": {
+          "type": "string",
+          "enum": ["web", "bff", "svc", "ingest"]
+        },
+        "name": {
+          "type": "string",
+          "pattern": "^[a-z][a-z0-9]*(-[a-z0-9]+)*$"
+        },
+        "description": {
+          "type": "string",
+          "minLength": 1
+        },
+        "states": {
+          "type": "object",
+          "minProperties": 1,
+          "additionalProperties": { "type": "boolean" }
+        }
+      }
+    }
+  }
+}
