@@ -12,7 +12,7 @@ toggles:
     name: processor-engine
     description: Enables the event processor engine.
     states:
-      prd: false
+      prd: true
       qa: false
 
   - service: web
