@@ -42,7 +42,7 @@ jobs:
   edit:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
         with:
           token: ${{ secrets.TOGGLES_PR_PAT }}
       - uses: actions/setup-node@v4

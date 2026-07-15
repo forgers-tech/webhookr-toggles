@@ -39,7 +39,7 @@ jobs:
     outputs:
       envs: ${{ steps.set.outputs.envs }}
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       - uses: actions/setup-node@v4
         with:
           node-version-file: .nvmrc
@@ -67,7 +67,7 @@ jobs:
       UNLEASH_API_TOKEN: ${{ secrets.UNLEASH_API_TOKEN }}
       TARGET_ENV: ${{ matrix.env }}
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       - uses: actions/setup-node@v4
         with:
           node-version-file: .nvmrc
