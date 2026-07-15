@@ -61,7 +61,7 @@ jobs:
       # The Unleash admin API is reachable only over the tailnet; join it as an
       # ephemeral tag:ci node (the tailnet ACL is flat, so 443 is reachable).
       - name: Connect Tailscale
-        uses: tailscale/github-action@v3
+        uses: tailscale/github-action@v4
         with:
           oauth-client-id: ${{ secrets.TS_OAUTH_CLIENT_ID }}
           oauth-secret: ${{ secrets.TS_OAUTH_SECRET }}
