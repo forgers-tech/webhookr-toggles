@@ -12,12 +12,33 @@ toggles:
     name: processor-engine
     description: Enables the event processor engine.
     states:
-      prd: false
+      prd: true
       qa: false
 
   - service: web
     name: new-dashboard
     description: Enables the new dashboard layout.
+    states:
+      prd: false
+      qa: false
+
+  - service: web
+    name: event-timeline
+    description: Renders the per-event processor execution timeline panel on the event detail screen.
+    states:
+      prd: false
+      qa: false
+
+  - service: svc
+    name: force-send
+    description: Enables the force-send (manual delivery override) endpoint; authoritative kill-switch for the capability.
+    states:
+      prd: false
+      qa: false
+
+  - service: web
+    name: force-send
+    description: Shows the force-send action on blocked events in the event detail screen (UI gate; the svc flag is the hard kill-switch).
     states:
       prd: false
       qa: false

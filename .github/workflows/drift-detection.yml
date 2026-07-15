@@ -1,5 +1,7 @@
 name: Drift Detection
 
+run-name: "Drift · ${{ inputs.environment || 'active envs' }}"
+
 # Compares toggles.yaml against Unleash. Read-only, so it does NOT run under a
 # GitHub Environment (no approval gate blocking the schedule). Actionable drift
 # (missing / state / description) fails the run; Unleash-only flags are warnings.
